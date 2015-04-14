@@ -54,13 +54,34 @@ public class NewsLoaderTest {
 		List<String> subscribentContent = (List< String >)Whitebox.getInternalState(publishableNews, "subscribentContent");
 		expectedResult = new ArrayList<String>();
 		expectedResult.add("someContent");
-		assertEquals(expectedResult , publicContent);
+		assertEquals(expectedResult , publicContent);		
+	}
+	
+	@Test
+	public void test(){
+		IncomingNews incomingNews = new IncomingNews();
+		IncomingInfo incomingInfo = new IncomingInfo("someContent",SubsciptionType.NONE);
+		incomingNews.add(incomingInfo);
+		
+		Configuration configuration = mock(Configuration.class);
+		when(configuration.getReaderType()).thenReturn("WS");
+		
+		mockStatic(ConfigurationLoader.class);
+		ConfigurationLoader configurationLoader = mock( ConfigurationLoader.class );
+		when(ConfigurationLoader.getInstance()).thenReturn(configurationLoader);
+		when(configurationLoader.loadConfiguration()).thenReturn(configuration);
+		
+		WebServiceNewsReader wsnReader = mock(WebServiceNewsReader.class);
+		when(wsnReader.read()).thenReturn(incomingNews);
+		
+		mockStatic(NewsReaderFactory.class);			
+		when(NewsReaderFactory.getReader((String)Mockito.any())).thenReturn(wsnReader);
 		
 		
+		NewsLoader newsLoader = new NewsLoader();
+		PublishableNews publishableNews = newsLoader.loadNews();
 		
-		
-		
-		
+		Mockito.verify(configurationLoader.loadConfiguration(), Mockito.times(1)).getReaderType();
 		
 		
 		
